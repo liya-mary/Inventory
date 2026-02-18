@@ -23,7 +23,7 @@ function Products(){
     const [showFilters,setShowFilters]=useState<boolean>(false);
     const [showSorting,setShowSorting]=useState<boolean>(false);
     const [loading,setLoading]=useState<boolean>(false);
-    
+    const [errorMessage,setErrorMessage]=useState<string|null>(null);
 
     const PAGE_SIZE=10;
     const totalPages:number=Math.ceil(count/PAGE_SIZE);
@@ -39,8 +39,13 @@ function Products(){
         ]
         setCategoryList(uniqueCategories);
 
-        } catch (error) {
+        } catch (error:unknown) {
           console.error("Error fetching categories: ",error);
+          if (error instanceof Error) {
+            setErrorMessage("Network error. Please check your internet connection.");
+          } else {
+            setErrorMessage("Something went wrong while loading products.");
+          }
         }
       }
       fetchCategories();
@@ -107,7 +112,7 @@ function Products(){
         } 
 
         fetchData();
-    },[page,search,category,minPrice,maxPrice,stockFilter,sortBy,sortOrder])
+  },[page,search,category,minPrice,maxPrice,stockFilter,sortBy,sortOrder])
 
     const handleSearchChange = (value: string) => {
       setSearch(value);
@@ -117,8 +122,6 @@ function Products(){
   return (
     <div>
       <h5 className="font-sans antialiased font-bold text-5xl md:text-6xl lg:text-7xl text-gray-200">Inventory</h5>
-
-
       <div className='flex flex-wrap justify gap-3 m-3 '>
 
       <div>
@@ -167,7 +170,6 @@ function Products(){
                 sortOrder={sortOrder} 
                 setSortOrder={setSortOrder}
                 setPage={setPage}/>
-
         }
 
       </div>
@@ -177,12 +179,16 @@ function Products(){
           <div>
           <p>Loading :)</p>
           </div>
-        )}
-        {productList.length===0 && (
+      )}
+      {productList.length===0 && (
           <div>No Products Found :(</div>
-        )
-
-        }
+      )}
+      {errorMessage && (
+        <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-6">
+          {errorMessage}
+        </div>
+      )}
+            
       <div className='flex flex-wrap gap-6 mt-6'>
         {productList.map((item:Product)=>{
           return <div key={item.id} className="rounded-lg border shadow-sm overflow-hidden bg-white border-slate-200 shadow-slate-950/5 w-96">
@@ -197,10 +203,10 @@ function Products(){
           </div>
           <div className="w-full px-3.5 pt-2 pb-3.5 rounded"><button className="inline-flex items-center justify-center border align-middle select-none font-sans font-medium text-center transition-all duration-300 ease-in disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed data-[shape=pill]:rounded-full data-[width=full]:w-full focus:shadow-none text-sm rounded-md py-2 px-4 shadow-sm hover:shadow-md bg-slate-200 border-slate-200 text-slate-800 hover:bg-slate-100 hover:bg-slate-100" data-shape="default" data-width="full">Add to Cart</button></div>
         </div>
-        
-          
         })}
       </div>
+
+      {/* pagination */}
 
       <div className='flex flex-col sm:flex-row justify-between items-center mt-10  gap-4'>
         <button className='bg-gray-300   ' disabled={page===1} onClick={()=>{
