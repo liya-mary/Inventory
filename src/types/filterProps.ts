@@ -1,6 +1,4 @@
 export interface FilterProps {
-    search: string;
-    setSearch: (value: string) => void;
     category: string;
     setCategory: (value: string) => void;
     categoryList: string[];

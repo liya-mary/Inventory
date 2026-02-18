@@ -4,8 +4,7 @@ function Sorting({sortBy,setSortBy,sortOrder,setSortOrder}:SortingProps){
 
     return(
         <div>
-            <span className="text-slate-300">Sort Products</span>
-             <div className="flex flex-col sm:flex-row gap-4 mb-6">
+             <div className="flex flex-col sm:flex-row gap-4 mb-6 m-3">
 
                 {/* Sort Field */}
                 <select
