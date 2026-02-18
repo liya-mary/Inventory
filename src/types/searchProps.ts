@@ -1,5 +1,5 @@
 export type SearchProps = {
-    search: string;
-    setSearch: (value: string) => void;
-    setPage: (value: number) => void;
-}
+  search: string;
+  setSearch: (value: string) => void;
+  setPage: (value: number) => void;
+};

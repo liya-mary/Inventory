@@ -1,5 +1,4 @@
-@import "tailwindcss";
-body{
+@import 'tailwindcss';
+body {
   @apply bg-blue-900;
-
 }
