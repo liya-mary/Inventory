@@ -2,6 +2,7 @@ import { supabase } from '../supabase'
 import type { Product } from '../types/product';
 import { useEffect, useState } from 'react'
 import Filters from './Filters';
+import Sorting from './Sorting';
 
 
 
@@ -16,6 +17,9 @@ function Products(){
     const [minPrice,setMinPrice]=useState<string>("0");
     const [maxPrice,setMaxPrice]=useState<string>("");
     const [stockFilter,setStockFilter]=useState<string>("");
+    const [sortBy,setSortBy]=useState<string>("created_at");
+    const [sortOrder,setSortOrder]=useState<"asc"|"desc">("desc");
+    // const [showFilters,setShowFilters]=useState<boolean>(false);
     
 
     const PAGE_SIZE=10;
@@ -49,35 +53,39 @@ function Products(){
           const from=(page-1)*PAGE_SIZE;
           const to= from+PAGE_SIZE-1;
 
-          let products=supabase.from("products").select("*",{count:"exact"});
+          let query=supabase.from("products").select("*",{count:"exact"});
 
           if(search){
-            products=products.ilike("name",`%${search}%`);
+            query=query.ilike("name",`%${search}%`);
           }
           if(category){
-            products=products.eq("category",category);
+            query=query.eq("category",category);
           }
 
           if(minPrice !==""){
-            products=products.gte("price",Number(minPrice));
-            console.log("minprice products: ",products);
+            query=query.gte("price",Number(minPrice));
+            console.log("minprice products: ",query);
           }
 
           if(maxPrice !==""){
-            products=products.lte("price",Number(maxPrice));
-            console.log("maxprice products: ",products);
+            query=query.lte("price",Number(maxPrice));
+            console.log("maxprice products: ",query);
 
           }
 
           if(stockFilter==="in"){
-            products=products.gt("stock_quantity",0);
+            query=query.gt("stock_quantity",0);
           }
 
           if(stockFilter==="out"){
-            products=products.eq("stock_quantity",0);
+            query=query.eq("stock_quantity",0);
           }
 
-            const {data,error,count} = await products
+          query=query.order(sortBy,{ascending:sortOrder==="asc"});
+          console.log("sorted query: ",query);
+
+
+            const {data,error,count} = await query
             .range(from,to);
 
             console.log("products: ",data);
@@ -95,7 +103,7 @@ function Products(){
         } 
 
         fetchData();
-    },[page,search,category,minPrice,maxPrice,stockFilter])
+    },[page,search,category,minPrice,maxPrice,stockFilter,sortBy,sortOrder])
 
     const handleSearchChange = (value: string) => {
       setSearch(value);
@@ -105,6 +113,11 @@ function Products(){
   return (
     <div>
       <div>
+        {/* <button
+        onClick={()=>setShowFilters(!showFilters)}
+        >
+
+        </button> */}
         <Filters 
         search={search} 
         setSearch={handleSearchChange} 
@@ -121,9 +134,17 @@ function Products(){
         setStockFilter={setStockFilter}
         />
       </div>
+      <div>
+        <Sorting 
+        sortBy={sortBy} 
+        setSortBy={setSortBy} 
+        sortOrder={sortOrder} 
+        setSortOrder={setSortOrder}
+        setPage={setPage}/>
+      </div>
       <div className='flex flex-wrap gap-6 mt-6'>
         {productList.map((item:Product)=>{
-          return <div className="rounded-lg border shadow-sm overflow-hidden bg-white border-slate-200 shadow-slate-950/5 w-96">
+          return <div key={item.id} className="rounded-lg border shadow-sm overflow-hidden bg-white border-slate-200 shadow-slate-950/5 w-96">
           <div className="w-full h-max rounded px-3.5 py-2.5">
             <div className="mb-2  items-center ">
               <h5 className="font-sans antialiased font-bold text-xl md:text-2xl lg:text-3xl text-current">{item.name}</h5>
